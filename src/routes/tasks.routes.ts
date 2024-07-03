@@ -1,5 +1,8 @@
 import { Router } from 'express'
+import {CreateTaskDTO} from '@/utils/dto/task.dto'
+import validateRequest from '@/middleware/validation.middleware'
 import {createTask, getAllTasks, getTaskByUUID, updateTask, deleteTask} from "@/controllers/task.controller";
+import {validate} from "class-validator";
 
 const taskRouter = Router();
 
@@ -7,7 +10,7 @@ taskRouter.get('/',getAllTasks);
 taskRouter.get(/^\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$/,
     getTaskByUUID);
 
-taskRouter.post('/',createTask);
+taskRouter.post('/', validateRequest(CreateTaskDTO),createTask);
 
 taskRouter.put(/^\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$/,
     updateTask);
