@@ -26,7 +26,7 @@ export default class TaskService{
         try{
             return await this.TaskRepository.getAllTasks();
         }catch(e){
-            throw new Error('Unable to create task')
+            throw new Error('Unable to get tasks')
         }
 
     }
@@ -36,7 +36,7 @@ export default class TaskService{
         try{
             return await this.TaskRepository.getTaskByUUID(uuid);
         }catch(e){
-            throw new Error('Unable to create task')
+            throw new Error('Unable to get task')
         }
 
     }
@@ -46,7 +46,7 @@ export default class TaskService{
         try{
             return await this.TaskRepository.updateTaskByUUID(uuid, data);
         }catch(e){
-            throw new Error('Unable to create task')
+            throw new Error('Unable to update task')
         }
 
     }
@@ -56,7 +56,7 @@ export default class TaskService{
         try{
             return await this.TaskRepository.deleteTaskByUUID(uuid);
         }catch(e){
-            throw new Error('Unable to create task')
+            throw new Error('Unable to delete task')
         }
 
     }
