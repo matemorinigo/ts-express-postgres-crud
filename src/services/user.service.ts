@@ -7,7 +7,7 @@ import {Role} from '@/utils/dto/user.dto'
 export default class UserService{
     private UserRepository = new UserRepository();
 
-    public async getAllUsers():Promise<User[]|void>{
+    async getAllUsers():Promise<User[]|void>{
         try{
             return await this.UserRepository.getAllUsers();
         }catch(e){
@@ -15,11 +15,29 @@ export default class UserService{
         }
     }
 
-    public async createUser(data:{username:string, password:string, role?:Role} ):Promise<User|void>{
+    async createUser(data:{username:string, password:string, role?:Role} ):Promise<User|void>{
         try{
             return await this.UserRepository.createUser(data);
         }catch(e){
             throw new Error("User already exists")
         }
+    }
+
+    async validateUser(data:{username:string,password:string}):Promise<Boolean|void>{
+        try{
+            return await this.UserRepository.validateUser(data);
+        }catch(e:unknown){
+            throw new Error("User doesn't exists");
+        }
+    }
+
+    async getUuidByUsername(username:string):Promise<string>{
+        let user = await this.UserRepository.getUuidByUsername(username);
+
+        if(user)
+            return user.id;
+        else
+            throw new Error("Username doesn't exists");
+
     }
 }

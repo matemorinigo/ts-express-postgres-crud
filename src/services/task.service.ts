@@ -1,27 +1,26 @@
 import Task from '@/utils/interfaces/task.interface'
 import TaskRepository from "@/repositories/task.repository";
+import {Status} from "@/utils/dto/task.dto";
+
 
 
 export default class TaskService{
 
     private TaskRepository = new TaskRepository();
 
-    constructor() {
 
-    }
-
-
-    public async create(title:string, description:string):Promise<Task>{
+    async create(title:string, description:string, username:string):Promise<Task>{
 
         try{
-            return await this.TaskRepository.createTask(title,description);
+            return await this.TaskRepository.createTask(title,description, username);
         }catch(e){
+
             throw new Error('Unable to create task')
         }
 
     }
 
-    public async getAll():Promise<Task[]>{
+    async getAll():Promise<Task[]>{
 
         try{
             return await this.TaskRepository.getAllTasks();
@@ -31,17 +30,17 @@ export default class TaskService{
 
     }
 
-    public async getByUUID(uuid:string):Promise<Task|null>{
+    async getByUUID(uuid:string,username:string):Promise<Task|null>{
 
         try{
-            return await this.TaskRepository.getTaskByUUID(uuid);
+            return await this.TaskRepository.getTaskByUUID(uuid,username);
         }catch(e){
             throw new Error('Unable to get task')
         }
 
     }
 
-    public async updateByUUID(uuid:string, data:{title?:string,body?:string}):Promise<Task|null>{
+    async updateByUUID(uuid:string, data:{title?:string,description?:string,status?:Status,username:string}):Promise<Task|null>{
 
         try{
             return await this.TaskRepository.updateTaskByUUID(uuid, data);
@@ -51,13 +50,21 @@ export default class TaskService{
 
     }
 
-    public async deleteByUUID(uuid:string):Promise<Task|null>{
+    async deleteByUUID(uuid:string, username:string):Promise<Task|null>{
 
         try{
-            return await this.TaskRepository.deleteTaskByUUID(uuid);
+            return await this.TaskRepository.deleteTaskByUUID(uuid,username);
         }catch(e){
             throw new Error('Unable to delete task')
         }
 
+    }
+
+    async getAllByUsername(username:string):Promise<Task[]|null>{
+        try{
+            return await this.TaskRepository.getTasksByUsername(username);
+        }catch(e){
+            throw new Error("Username doesn't exists")
+        }
     }
 }

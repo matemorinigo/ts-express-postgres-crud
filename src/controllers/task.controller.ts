@@ -1,101 +1,102 @@
-import { Request, Response, NextFunction} from "express";
+import {Request, Response, NextFunction, Router} from "express";
 
 import HttpException from "@/utils/exceptions/http.exception";
 import TaskService from "@/services/task.service";
+import validateRequest from "@/middleware/validation.middleware";
 
+import {CreateTaskDTO, Status, UpdateTaskDTO} from "@/utils/dto/task.dto";
 
+const taskRouter = Router();
+const taskService:TaskService = new TaskService();
 
-async function createTask(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
-   let taskService:TaskService = new TaskService();
-
-    try{
-        const {title, description} = req.body;
-
-        const task = await taskService.create(title, description);
-
-        res.status(201).json({task});
-
-    }catch(e){
-        next(new HttpException(400,'Cannot create the task'));
-    }
-}
-
-async function getAllTasks(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
-    let taskService:TaskService = new TaskService();
+taskRouter.get('/',async function(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
 
     try{
-
-        const task = await taskService.getAll();
-
+        const username = req.body.username
+        const task = await taskService.getAllByUsername(username);
         res.status(200).json({task});
 
     }catch(e){
+        console.log(e);
         next(new HttpException(400,'Cannot get the tasks'));
     }
-}
+});
+taskRouter.get('/:uuid',
+    async function(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
+        let uuid = req.params.uuid
+        const username = req.body.username
 
-async function getTaskByUUID(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
-    let uuid = req.params[0]
+        try{
 
-    let taskService:TaskService = new TaskService();
+            const task = await taskService.getByUUID(uuid,username);
 
-    try{
+            if(task)
+                res.status(200).json({task});
+            else{
+                res.status(404).json({message:"There is no task with that ID"})
+            }
 
-        const task = await taskService.getByUUID(uuid);
-
-        if(task)
-            res.status(200).json({task});
-        else{
-            res.status(404).json({message:"There is no task with that ID"})
+        }catch(e){
+            next(new HttpException(400,'Cannot get the task'));
         }
+    });
 
-    }catch(e){
-        next(new HttpException(400,'Cannot get the task'));
-    }
-}
+taskRouter.post('/',validateRequest(CreateTaskDTO),async function (req:Request, res:Response, next:NextFunction):Promise<Response|void>{
 
-async function updateTask(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
-    let uuid = req.params[0];
+        try{
+            const {title, description, username} = req.body;
 
-    let data:{title?:string,body?:string} = req.body
+            const task = await taskService.create(title, description, username);
 
-    let taskService:TaskService = new TaskService();
+            res.status(201).json({task});
 
-    try{
-
-        const task = await taskService.updateByUUID(uuid, data);
-
-        if(task)
-            res.status(200).json({task});
-        else{
-            res.status(404).json({message:"There is no task with that ID"})
+        }catch(e){
+            console.log(e);
+            next(new HttpException(400,'Cannot create the task'));
         }
-
-    }catch(e){
-        next(new HttpException(400,'Cannot update the task'));
     }
-}
+);
 
-async function deleteTask(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
-    let uuid = req.params[0]
+taskRouter.put('/:uuid',validateRequest(UpdateTaskDTO),
+    async function (req:Request, res:Response, next:NextFunction):Promise<Response|void>{
+        const uuid = req.params.uuid;
 
-    let taskService:TaskService = new TaskService();
+        const data:{title?:string,description?:string,status?:Status,username:string} = req.body
 
-    try{
 
-        const task = await taskService.deleteByUUID(uuid);
+        try{
 
-        if(task)
-            res.status(200).json({task});
-        else{
-            res.status(404).json({message:"There is no task with that ID"})
+            const task = await taskService.updateByUUID(uuid, data);
+
+            if(task)
+                res.status(200).json({task});
+            else{
+                res.status(404).json({message:"There is no task with that ID"})
+            }
+
+        }catch(e){
+            next(new HttpException(400,'Cannot update the task'));
         }
+    });
 
-    }catch(e){
-        next(new HttpException(400,'Cannot delete the task'));
-    }
-}
+taskRouter.delete('/:uuid',
+    async function(req:Request, res:Response, next:NextFunction):Promise<Response|void>{
+        const uuid = req.params.uuid
 
+        try{
 
-export {createTask, getAllTasks, getTaskByUUID, updateTask,deleteTask}
+            const task = await taskService.deleteByUUID(uuid,req.body.username);
+
+            if(task)
+                res.status(200).json({task});
+            else{
+                res.status(404).json({message:"There is no task with that ID"})
+            }
+
+        }catch(e){
+            next(new HttpException(400,'Cannot delete the task'));
+        }
+    });
+
+export default taskRouter
 

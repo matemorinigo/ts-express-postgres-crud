@@ -8,8 +8,7 @@ import errorMiddleware from '@/middleware/error.middleware'
 
 import helmet from 'helmet'
 
-import taskRouter from "@/routes/task.routes";
-import userRouter from "@/routes/user.routes";
+import router from "@/routes/routes";
 
 
 const app:Application = express();
@@ -21,9 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use(compression());
 
-
-app.use('/api/tasks', taskRouter);
-app.use('/api/users', userRouter);
+app.use('/api', router);
 
 app.use(errorMiddleware);
 
